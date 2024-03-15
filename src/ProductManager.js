@@ -1,17 +1,12 @@
-import {promises as fs} from "fs"
-import { v4 as uuid } from "uuid";
+//import {promises as fs} from "fs"
+//import { v4 as uuid } from "uuid";
+import { ProductModel } from "./models/product.model.js";
 
 export class ProductManager {
-    constructor(){
-        this.path = 'products.json';
-        this.products = []
-    }
 
-    addProduct = async ({title, description, price, img, code, stock, status, category }) => {
-       
-        const id = uuid ()
-        
-        let newProduct = {
+    addProduct = async ({ title, description, price, img, code, stock, status, category }) => {
+
+        let newProduct = new ProductModel({
             title,
             description,
             price,
@@ -20,62 +15,72 @@ export class ProductManager {
             stock,
             status,
             category,
-            id
-        };
+        });
 
-        this.products = await this.getProducts()
-        
-        this.products.push(newProduct)
+        await newProduct.save();
 
-        await fs.writeFile(this.path, JSON.stringify(this.products, null, 2));
-        return newProduct;
     }
 
     getProducts = async () => {
-        const response = await fs.readFile (this.path, "utf-8")
-        const responseJSON = JSON.parse (response)
-    
-        return responseJSON;
-    }
+        try {
+            const productos = await ProductModel.find();
+            return productos;
 
-
-    getProductById = async (id)=>{
-        const response = await this.getProducts()
-
-        const product = response.find (product => product.id == id)
-
-        if (product){
-            return product
-        } else {
-            console.log ("Producto no encontrado");
+        } catch (error) {
+            console.log("error al recuperar producto", error);
         }
     }
 
-    updateProduct = async (id, {...producto}) => {
-        const products = await this.getProducts()
-        const index = products.findIndex (product => product.id == id)
+    getProductById = async (id) => {
+        try {
+            const producto = await ProductModel.findById(id);
 
-        if (index !== -1){
-            products [index] = {id, ...producto}
-            await fs.writeFile (this.path, JSON.stringify (products))
-            return products [index]
-        
-        }else{
-            console.log ("no se puede actualizar")
+            if (!producto) {
+                console.log("producto no encontrado");
+                return null;
+            } else {
+                console.log("producto encontrado");
+                return producto;
+            }
+        } catch (error) {
+            console.log("error al leer archivo", error)
         }
     }
 
-    deleteProduct = async (id) =>{
-        const products = await this.getProducts()
-        const index = products.findIndex (product => product.id == id)
+    updateProduct = async (id, productoActualizado) => {
+        try {
+            const updateProduct = await ProductModel.findByIdAndUpdate(id, productoActualizado);
 
-        if (index != -1){
-            products.splice (index, 1)
-            await fs.writeFile (this.path, JSON.stringify(products))
-        }else{
-            console.log ("producto no encontrado")
+            if (!updateProduct) {
+                console.log("producto que queres actualizar no encontrado");
+                return null;
+            }
+
+            console.log("producto actualizado: ");
+            return updateProduct
+
+        } catch (error) {
+            console.log("error al actualizar el producto", error);
+
         }
     }
 
+    deleteProduct = async (id) => {
+
+        try {
+            const deleteProduct = await ProductModel.findByIdAndDelete(id);
+
+            if (!deleteProduct) {
+                console.log("producto que queres eliminar no encontrado");
+                return null;
+            }
+
+            console.log("producto eliminado");
+
+        } catch (error) {
+            console.log("error al eliminar el producto", error);
+
+        }
+    }
 };
 

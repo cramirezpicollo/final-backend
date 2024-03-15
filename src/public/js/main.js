@@ -1,52 +1,39 @@
 const socket = io();
 
-socket.on("productos", (data) => {
-    renderProductos(data);
+let user;
+
+const chatBox = document.getElementById("chatBox");
+
+Swal.fire({
+    title: "Identificate",
+    input: "text",
+    text: "Ingrese un usuario para identificarse en el chat",
+    inputValidator: (value) => {
+        return !value && "Necesitas escribir un nombre para continuar"
+    },
+    allowOutsideClick: false
+}).then(result => {
+    user = result.value;
+    console.log(user);
 })
 
-const renderProductos = (productos) => {
-    const contenedorProductos = document.getElementById("contenedorProductos");
-    contenedorProductos.innerHTML = "";
 
-    productos.forEach(item => {
-        const card = document.createElement("div")
-        card.classList.add("card");
-
-        card.innerHTML = ` 
-                         <p> ${item.id} </p>
-                         <p> ${item.title} </p>
-                         <p> ${item.price} </p>
-                         <button> Eliminar </button>
-                         `;
-
-        contenedorProductos.appendChild(card);
-        card.querySelector("button").addEventListener("click",()=> {
-            eliminarProducto (item.id)
-        })
-
-    });
-}
-
-const eliminarProducto = (id)=>{
-    socket.emit ("eliminarProducto", id);
-}
-
-
-document.getElementById("btnEnviar").addEventListener ("click",()=>{
-    agregarProducto();
+chatBox.addEventListener("keyup", (event) => {
+    if (event.key === "Enter") {
+        if (chatBox.value.trim().length > 0) {
+    
+            socket.emit("message", { user: user, message: chatBox.value });
+            chatBox.value = "";
+        }
+    }
 })
 
-const agregarProducto = () =>{
-    const producto ={
-        title: document.getElementById("title").value,
-        description: document.getElementById("description").value,
-        price: document.getElementById("price").value,
-        img: document.getElementById("img").value,
-        code: document.getElementById("code").value,
-        stock: document.getElementById("stock").value,
-        category: document.getElementById("category").value,
-        status: document.getElementById("status").value === "true",
-    };
+socket.on("message", (data) => {
+    let log = document.getElementById("messagesLogs");
+    let mensajes = "";
 
-    socket.emit ("agregarProducto",producto);
-}
+    data.forEach(mensaje => {
+        mensajes = mensajes + `${mensaje.user} dice: ${mensaje.message} <br>`;
+    })
+    log.innerHTML = mensajes;
+})
