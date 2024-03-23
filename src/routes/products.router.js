@@ -5,16 +5,27 @@ const productsRouter = Router()
 
 productsRouter.get("/", async (req, res) => {
     try {
-        const limit = req.query.limit;
-        const products = await productManager.getProducts()
+        const { limit = 10, page = 1, sort, query } = req.query;
 
-        if (limit) {
-            const limitedProducts = products.slice(0, limit)
-            return res.json(limitedProducts)
-        } else {
-            return res.json(products)
-        }
+        const productos = await productManager.getProducts({
+            limit: parseInt(limit),
+            page: parseInt(page),
+            sort,
+            query,
+        });
 
+        res.json({
+            status: 'success',
+            payload: productos,
+            totalPages: productos.totalPages,
+            prevPage: productos.prevPage,
+            nextPage: productos.nextPage,
+            page: productos.page,
+            hasPrevPage: productos.hasPrevPage,
+            hasNextPage: productos.hasNextPage,
+            prevLink: productos.hasPrevPage ? `/api/products?limit=${limit}&page=${productos.prevPage}&sort=${sort}&query=${query}` : null,
+            nextLink: productos.hasNextPage ? `/api/products?limit=${limit}&page=${productos.nextPage}&sort=${sort}&query=${query}` : null,
+        });
     } catch (error) {
         console.log(error);
         res.send("Error al intentar recibir el producto")
@@ -23,7 +34,6 @@ productsRouter.get("/", async (req, res) => {
 })
 
 productsRouter.get("/:pid", async (req, res) => {
-
     const { pid } = req.params;
 
     try {

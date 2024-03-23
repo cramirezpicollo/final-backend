@@ -7,7 +7,6 @@ import { CartManager } from "./cartManager.js";
 import { productsRouter } from "./routes/products.router.js";
 import { cartsRouter } from "./routes/carts.router.js";
 import { Mongoose } from "./database.js";
-import { MessageModel } from "./models/message.model.js";
 
 
 const PORT = 8080;
@@ -35,19 +34,4 @@ export const cartManager = new CartManager;
 
 const httpServer = app.listen(PORT, (req, res) => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
-})
-
-
-const io = new Server(httpServer);
-
-io.on("connection", (socket) => {
-    console.log("Un cliente conectado");
-
-    socket.on("message", async (data) => {
-        await MessageModel.create(data);
-
-        const messages = await MessageModel.find();
-
-        io.emit("message", messages);
-    })
 })
