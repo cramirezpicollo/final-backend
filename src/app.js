@@ -6,7 +6,10 @@ import { ProductManager } from "./ProductManager.js";
 import { CartManager } from "./cartManager.js";
 import { productsRouter } from "./routes/products.router.js";
 import { cartsRouter } from "./routes/carts.router.js";
-import { Mongoose } from "./database.js";
+import {sessionsRouter} from "./routes/sessions.router.js"
+import "./database.js"
+import MongoStore from "connect-mongo";
+import session from "express-session";
 
 
 const PORT = 8080;
@@ -20,12 +23,26 @@ app.set("views", "./src/views");
 
 //Middleware
 app.use(express.static("./src/public"));
+app.use(express.urlencoded({extended:true}));
 app.use(express.json())
+
+//Middleware Session
+app.use (session({
+    secret: "secretCoder",
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create ({
+        mongoUrl: "mongodb+srv://cramirezpicollo:walenten1.@cluster0.i0f05yt.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0"
+
+    })
+
+}))
 
 //Rutas
 app.use("/", router)
 app.use("/api/products", productsRouter)
 app.use("/api/carts", cartsRouter)
+app.use("/api/sessions", sessionsRouter)
 
 
 export const productManager = new ProductManager;

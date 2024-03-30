@@ -1,6 +1,6 @@
 //import { promises as fs } from "fs"
 //import { v4 as uuid } from "uuid";
-import { CartModel } from "./models/cart.model.js";
+import {CartModel} from "./models/cart.model.js";
 
 export class CartManager {
 
@@ -114,7 +114,7 @@ export class CartManager {
             } else {
                 throw new Error('Producto no encontrado en el carrito');
             }
-            
+
         } catch (error) {
             console.error('Error al actualizar la cantidad del producto en el carrito', error);
             throw error;

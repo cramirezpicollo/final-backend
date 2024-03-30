@@ -1,6 +1,6 @@
 //import {promises as fs} from "fs"
 //import { v4 as uuid } from "uuid";
-import { ProductModel } from "./models/product.model.js";
+import {ProductModel} from "./models/product.model.js";
 
 export class ProductManager {
 
