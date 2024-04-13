@@ -10,6 +10,9 @@ import {sessionsRouter} from "./routes/sessions.router.js"
 import "./database.js"
 import MongoStore from "connect-mongo";
 import session from "express-session";
+import passport from "passport";
+import { initializePassport } from "./config/passport.config.js";
+
 
 
 const PORT = 8080;
@@ -37,6 +40,10 @@ app.use (session({
     })
 
 }))
+
+initializePassport ();
+app.use (passport.initialize());
+app.use (passport.session());
 
 //Rutas
 app.use("/", router)
